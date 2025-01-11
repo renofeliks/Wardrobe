@@ -22,5 +22,10 @@ header {
 }
 
 .nav-list a:hover {
-    text-decoration: underline;
+    transform: scale(1.10);
 }
+
+.nav-list a {
+    text-decoration: none;
+    color: white;
+  }

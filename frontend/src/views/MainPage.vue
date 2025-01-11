@@ -2,8 +2,8 @@
     <div class="page-wrapper">
       <Header />
       <main class="content">
-        <h2>Welcome to Main Page</h2>
-        <p>This is the main content area.</p>
+        <h2>Main Page</h2>
+        <p>Content area.</p>
       </main>
       <Footer />
     </div>

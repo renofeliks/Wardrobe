@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainPage from '../views/MainPage.vue';
+import WardRobe from '../views/WardRobe.vue';
 
 const routes = [
   {
     path: '/',
     name: 'MainPage',
-    component: MainPage, // Display this component at the root URL
+    component: MainPage,
+  },
+  {
+    path: '/wardrobe',
+    name: 'WardRobe',
+    component: WardRobe,
   },
 ];
 

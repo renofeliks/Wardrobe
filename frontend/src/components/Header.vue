@@ -2,8 +2,8 @@
     <header>
       <nav>
         <ul class="nav-list">
-            <li>Home</li>
-            <li>Wardrobe</li>
+          <li><a href="/">Home</a></li>
+          <li><a href="/wardrobe">Wardrobe</a></li>
         </ul>
       </nav>
     </header>
