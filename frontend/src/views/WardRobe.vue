@@ -27,10 +27,15 @@
 
         <div class="add-item-form">
           <input v-model="newClothing.name" placeholder="Name" />
-          <input v-model="newClothing.type" placeholder="Type" />
+          <select id="select-type" v-model="newClothing.type">
+            <option value="" disabled>Select Type</option>
+            <option value="Tops">Tops</option>
+            <option value="Bottoms">Bottoms</option>
+            <option value="Shoes">Shoes</option>
+          </select>
           <input type="file" @change="handleImageUpload" />
           
-          <div>
+          <div class="add-tag-form">
             <input v-model="newTag" placeholder="Add a tag" @keyup.enter="addTag" />
             <button @click="addTag">Add Tag</button>
             <ul>
@@ -40,7 +45,7 @@
             </ul>
           </div>
 
-          <button @click="addClothingPiece">Add Clothing</button>
+          <button id="add-clothing-button" @click="addClothingPiece">Add Clothing</button>
         </div>
       </main>
       <Footer />
@@ -60,6 +65,8 @@
     data() {
       return {
         clothes: [],
+        categories: ['Tops', 'Bottoms', 'Shoes'],
+        newCategory: '',
         newClothing: {
           name: '',
           type: '',
@@ -76,8 +83,8 @@
         let result = this.clothes;
 
         // Filter by type
-        if (this.selectedType === 'All') {
-          return this.clothes;
+        if (this.selectedType !== 'All') {
+          result = result.filter(item => item.type === this.selectedType);
         }
 
         // Filter by tag
@@ -167,6 +174,7 @@
       filterByTag() {
         this.selectedType = 'All';
       },
+      
     },
     mounted() {
       this.fetchClothes();
@@ -190,31 +198,30 @@
 
   .menu {
   margin-bottom: 20px;
-  display: flex;
   justify-content: center;
   gap: 10px;
   }
 
   .menu button {
-  background-color: coral;
+  background-color: lightcoral;
   color: white;
   padding: 10px 20px;
+  margin: 0.1em;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   }
 
-
   .menu button:hover {
     background-color: #005f7a;
   }
-
 
   .clothes-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 20px;
     justify-items: center;
+    justify-content: center;
   }
 
   .clothing-item {
@@ -237,7 +244,7 @@
   }
 
   .add-item-form {
-    margin: 1em;
+    margin-top: 10em;
   }
 
   .add-item-form input {
@@ -277,5 +284,28 @@
     border-radius: 5px;
     border: 1px solid #ccc;
     cursor: pointer;
+  }
+
+  /* Responsive design for smaller screens */
+  @media (max-width: 600px) {
+    .menu {
+      grid-template-columns: 1fr; /* Stack buttons vertically */
+      gap: 5px;
+    }
+
+    .menu button {
+      width: 100%; /* Make buttons full width */
+      padding: 10px;
+      margin-bottom: 5px;
+      width: 50%;
+    }
+
+    .tag-filter {
+      width: 50%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
   }
   </style>
