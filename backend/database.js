@@ -8,12 +8,10 @@ const pool = new Pool({
     port: "5433"
 });
 
-const execute = async(dropTblQuery, createTblQuery, insertDataQuery) => {
+const execute = async(createTblQuery) => {
     try {
         await pool.connect();
-        await pool.query(dropTblQuery); // Drop table if it exists
         await pool.query(createTblQuery);
-        await pool.query(insertDataQuery);
         return true;
     } catch (error) {
         console.error(error.stack);
@@ -23,10 +21,10 @@ const execute = async(dropTblQuery, createTblQuery, insertDataQuery) => {
 
 const createTblQuery = `
   CREATE TABLE IF NOT EXISTS "clothes" (
-    "id" INTEGER PRIMARY KEY,
+    "id" BIGINT PRIMARY KEY,
     "name" TEXT NOT NULL,
     "type" TEXT NOT NULL,
-    "image" TEXT NOT NULL,
+    "image" BYTEA,
     "tags" TEXT
   );
 `;
@@ -34,18 +32,14 @@ const createTblQuery = `
 const insertDataQuery = `
   INSERT INTO "clothes" ("id", "name", "type", "image", "tags")
   VALUES
-    (1, 'T-Shirt', 'Tops', '@/assets/images/tshirt.jpg', '[]'),
-    (2, 'Jeans', 'Bottoms', '@/assets/images/jeans.jpg', '[]'),
-    (3, 'Sneakers', 'Shoes', '@/assets/images/sneakers.jpg', '[]'),
-    (4, 'Sweater', 'Tops', '@/assets/images/sweater.jpg', '[]'),
-    (5, 'Shorts', 'Bottoms', '@/assets/images/shorts.jpg', '[]');
+    (1, 'T-Shirt', 'Tops', '@/assets/images/tshirt.jpg', '[black, short-sleeved]'),
+    (2, 'Jeans', 'Bottoms', '@/assets/images/jeans.jpg', '[blue, casual]'),
+    (3, 'Sneakers', 'Shoes', '@/assets/images/sneakers.jpg', '[white, casual]'),
+    (4, 'Sweater', 'Tops', '@/assets/images/sweater.jpg', '[orange, cozy]'),
+    (5, 'Shorts', 'Bottoms', '@/assets/images/shorts.jpg', '[blue, casual]');
 `;
 
-const dropTblQuery = `
-  DROP TABLE IF EXISTS "clothes";
-`;
-
-execute(dropTblQuery, createTblQuery, insertDataQuery).then(result => {
+execute(createTblQuery).then(result => {
     if (result) {
         console.log('If does not exists, table "clothes" is created');
     }

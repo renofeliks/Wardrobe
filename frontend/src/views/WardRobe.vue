@@ -7,6 +7,10 @@
           <button @click="filterClothes('Bottoms')">Bottoms</button>
           <button @click="filterClothes('Shoes')">Shoes</button>
           <button @click="filterClothes('All')">Show All</button>
+          <select v-model="selectedTag" @change="filterByTag" class="tag-filter">
+            <option value="">Filter by Tag</option>
+            <option v-for="(tag, index) in uniqueTags" :key="index" :value="tag">{{ tag }}</option>
+          </select>
         </div>
 
         <div class="clothes-grid">
@@ -64,14 +68,27 @@
         },
         newTag: '',
         selectedType: 'All',
+        selectedTag: '', // For tag filtering
       };
     },
     computed: {
       filteredClothes() {
+        let result = this.clothes;
+
+        // Filter by type
         if (this.selectedType === 'All') {
           return this.clothes;
         }
-        return this.clothes.filter(item => item.type === this.selectedType);
+
+        // Filter by tag
+        if (this.selectedTag) {
+          result = result.filter(item => item.tags.includes(this.selectedTag));
+        }
+
+        return result;
+      },
+      uniqueTags() {
+        return [...new Set(this.clothes.flatMap(item => item.tags))];
       },
     },
     methods: {
@@ -79,10 +96,10 @@
         fetch(`http://localhost:3000/clothes`)
           .then((response) => response.json())
           .then((data) => {
-            // Resolve @ alias dynamically
             this.clothes = data.map(item => ({
               ...item,
-              image: require(`@/assets/images/${item.image.split('/').pop()}`) // Extract image name and resolve
+              tags: Array.isArray(item.tags) ? item.tags : item.tags.replace(/[\\[\\]]/g, '').split(',').map(tag => tag.trim()), // Should remove brackets but doesn't ???
+              image: item.image ? `data:image/jpeg;base64,${item.image}` : '', // base64 prefix
             }));
           })
           .catch((err) => console.log(err.message));
@@ -90,8 +107,8 @@
       handleImageUpload(event) {
         const file = event.target.files[0];
         if (file) {
-          this.newClothing.image = URL.createObjectURL(file);
-        }
+          this.newClothing.imageFile = file; // Save the file object for FormData
+        }   
       },
       addTag() {
         if (this.newTag.trim()) {
@@ -103,16 +120,52 @@
         this.newClothing.tags.splice(index, 1);
       },
       removeClothing(id) {
-        this.clothes = this.clothes.filter(item => item.id !== id);
+        fetch(`http://localhost:3000/clothes/${id}`, {
+          method: 'DELETE',
+        })
+          .then((response) => {
+            if (response.ok) {
+              this.clothes = this.clothes.filter(item => item.id !== id); // Remove from frontend list
+              console.log('Clothing item deleted successfully');
+            } else {
+              console.error('Failed to delete clothing item');
+            }
+          })
+          .catch((err) => console.error('Error:', err));
       },
       addClothingPiece() {
-        const newItem = { ...this.newClothing, id: Date.now() };
-        this.clothes.push(newItem);
-        // Reset form
+        const formData = new FormData();
+        formData.append('name', this.newClothing.name);
+        formData.append('type', this.newClothing.type);
+        formData.append('tags', JSON.stringify(this.newClothing.tags));
+        formData.append('image', this.newClothing.imageFile);
+
+        fetch('http://localhost:3000/clothes', {
+          method: 'POST',
+          body: formData,
+        })
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error('Failed to add clothing item');
+            }
+          })
+          .then((data) => {
+            // Add the item to the local clothes array for immediate display
+            this.clothes.push({ ...this.newClothing, id: data.id });
+            console.log('Clothing item added successfully');
+          })
+          .catch((err) => console.error('Error:', err));
+
         this.newClothing = {name:'', type: '', image: null, tags: [] };
       },
       filterClothes(type) {
         this.selectedType = type;
+        this.selectedTag = '';
+      },
+      filterByTag() {
+        this.selectedType = 'All';
       },
     },
     mounted() {
@@ -216,6 +269,13 @@
     border: none;
     border-radius: 50%;
     margin-left: 5px;
+    cursor: pointer;
+  }
+
+  .tag-filter {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
     cursor: pointer;
   }
   </style>
